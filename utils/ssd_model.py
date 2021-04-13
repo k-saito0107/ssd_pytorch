@@ -134,3 +134,64 @@ class L2Norm(nn.Module):
 
         out =weights * x
         return out
+
+
+class DBox():
+    def __init__(self, cfg):
+        super(DBox, self).__init__()
+        self.image_size = cfg['input_size']
+        self.feature_maps = cfg['feature_maps']
+        self.num_priors = len(cfg['feature_maps'])
+        self.steps = cfg['steps']
+        self.min_size = cfg['min_sizes']
+        self.max_size = cfg['max_sizes']
+        self.aspect_rations = cfg['aspect_rations']
+
+    def make_box_list(self):
+        mean = []
+
+        for k, f in enumerate(self.feature_maps):
+            for i, j in product(range(f), repeat=2):
+                f_k = self.image_size/self.steps[k]
+
+                #DBox normalize
+                cx = (j + 0.5) / f_k
+                cy = (i + 0.5) / f_k
+
+                #Small DBox with aspect ratio of 1[cx, cy, width, height]
+                s_k = self.min_size[k] / self.image_size
+                mean += [cx, cy, s_k, s_k]
+
+                #Big DBox with aspect ratio of 1[cx, cy, width, height]
+                s_k_prime = sqrt(s_k * (self.max_size[k] / self.image_size))
+                mean += [cx, cy, s_k_prime, s_k_prime]
+
+                #Other aspect ratio DBox
+                for ar in self.aspect_rations[k]:
+                    mean += [cx, cy, s_k*sqrt(ar), s_k/sqrt(ar)]
+                    mean += [cx, cy, s_k/sqrt(ar), s_k*sqrt(ar)]
+        
+        output = torch.Tensor(mean).view(-1, 4)
+        output.clamp_(max = 1, min = 0)
+
+        return output
+
+
+class SSD(nn.Module):
+    def __init__(self, phase, cfg):
+        super(SSD, self).__init__()
+
+        self.phase = phase
+        self.num_classes = cfg['num_classes']
+        
+        self.resnet = Feature_extractor(in_ch=cfg['in_ch'], out_ch=cfg['out_ch'])
+        self.extras = Extras(in_ch=cfg['out_ch']*8)
+
+        dbox = DBox(cfg)
+        self.dbox_list = dbox.make_dbox_list()
+
+        if phase == 'val':
+            self.detect = Detect()
+
+                
+
