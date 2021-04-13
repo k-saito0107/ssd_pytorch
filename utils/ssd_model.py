@@ -66,10 +66,10 @@ class Feature_extractor(nn.Module):
         self.relu = nn.ReLU(inplace=True)
         self.maxpool = nn.MaxPool2d(kernel_size=3, stride=2)
 
-        self.layer1 = ResidualLayer(2, in_channels=out_ch, out_channels=out_ch)
-        self.layer2 = ResidualLayer(2, in_channels=out_ch, out_channels=out_ch*2)
-        self.layer3 = ResidualLayer(2, in_channels=out_ch*2, out_channels=out_ch*4)
-        self.layer4 = ResidualLayer(2, in_channels=out_ch*4, out_channels=out_ch*8)
+        self.layer1 = ResidualLayer(1, in_channels=out_ch, out_channels=out_ch)
+        self.layer2 = ResidualLayer(1, in_channels=out_ch, out_channels=out_ch*2)
+        self.layer3 = ResidualLayer(1, in_channels=out_ch*2, out_channels=out_ch*4)
+        self.layer4 = ResidualLayer(1, in_channels=out_ch*4, out_channels=out_ch*8)
 
     def forward(self, x):
         out = self.conv1(x)
@@ -78,10 +78,59 @@ class Feature_extractor(nn.Module):
         out = self.maxpool(out)
 
         out = self.layer1(out)
+        out = self.maxpool(out)
+
         out = self.layer2(out)
+        source1 = out
+        out = self.maxpool(out)
+
         out = self.layer3(out)
-        out = self.layer4(out)
+        out = self.maxpool(out)
 
+        source2 = self.layer4(out)
+
+        return source1, source2
+
+
+class Extras(nn.Module):
+    def __init__(self, in_ch):
+        super(Extras, self).__init__()
+        self.conv1_1 = nn.Conv2d(in_ch, int(in_ch/4), kernel_size=(1))
+        self.conv1_2 = nn.Conv2d(int(in_ch/4), int(in_ch/2), kernel_size=(3), stride=3, padding=7)
+
+        self.conv2_1 = nn.Conv2d(int(in_ch/2), int(in_ch/8), kernel_size=(1))
+        self.conv2_2 = nn.Conv2d(int(in_ch/8), int(in_ch/4), kernel_size=(3), stride=2, padding=1)
+
+        self.conv3_1 = nn.Conv2d(int(in_ch/4), int(in_ch/8), kernel_size=(1))
+        self.conv3_2 = nn.Conv2d(int(in_ch/8), int(in_ch/4), kernel_size=(3))
+
+        self.conv4_1 = nn.Conv2d(int(in_ch/4), int(in_ch/8), kernel_size=(1))
+        self.conv4_2 = nn.Conv2d(int(in_ch/8), int(in_ch/4), kernel_size=(3))
+
+    def forward(self, x):
+        source3 = self.conv1_2(self.conv1_1(x))
+        source4 = self.conv2_2(self.conv2_1(source3))
+        source5 = self.conv3_2(self.conv3_1(source4))
+        source6 = self.conv4_2(self.conv4_1(source5))
+
+        return source3, source4, source5, source6
+
+class L2Norm(nn.Module):
+    def __init__(self, in_ch, scale):
+        super(L2Norm, self).__init__()
+        self.weight = nn.Parameter(torch.Tensor(in_ch))
+        self.scale = scale
+        self.reset_parameter()
+        self.eps = 1e-10
+    
+    def reset_parameter(self):
+        init.constant_(self.weight, self.scale)
+    
+    def forward(self, x):
+        norm = x.pow(2).sum(dim=1, keepdim=True).sqrt()+self.eps
+        x = torch.div(x, norm)
+
+        weights = self.weight.unsqueeze(0).unsqueeze(2).unsqueeze(3).expand_as(x)
+
+        out =weights * x
         return out
-
-
