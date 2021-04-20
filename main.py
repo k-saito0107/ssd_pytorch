@@ -150,7 +150,7 @@ def train_model(net, dataloaders_dict, criterion, optimizer, num_epochs):
 
 def main():
     #root_path = '../data'
-    root_path = '/kw_resources/distortion_detection/data'
+    #root_path = '/kw_resources/distortion_detection/data'
     img_path = glob.glob(root_path+'/img/*.png')
     anno_path = glob.glob(root_path + '/anno/*.json')
     #get-train-img-path
@@ -198,6 +198,13 @@ def main():
     color_std = (0.5, 0.5, 0.5)
     
     input_size = 512
+    #calclate
+    s1 = int(input_size/4)
+    s2 = int(input_size/16)
+    s3 = int((s2+14-3)/3) +1
+    s4 = int((s3 + 2 -3)/2) + 1
+    s5 = s4 -2
+    s6 = s5 -2
     train_dataset = MakeDataset(train_img_path, anno_dic, phase="train", transform=DataTransform(
                                 input_size, color_mean, color_std))
     
@@ -205,7 +212,7 @@ def main():
                                 input_size, color_mean, color_std))
     
     #make dataloader
-    batch_size = 12
+    batch_size = 16
 
     train_dataloader = data.DataLoader(train_dataset, batch_size=batch_size, shuffle=True, collate_fn=od_collate_fn)
     val_dataloader = data.DataLoader(val_dataset, batch_size=batch_size, shuffle=False, collate_fn=od_collate_fn)
@@ -219,7 +226,7 @@ def main():
         'num_classes': 2,  # 背景クラスを含めた合計クラス数
         'input_size': input_size,  # 画像の入力サイズ
         'bbox_aspect_num': [4, 6, 6, 6, 4, 4],  # 出力するDBoxのアスペクト比の種類
-        'feature_maps': [128, 32, 15, 8, 6, 4],  # 各sourceの画像サイズ
+        'feature_maps': [s1, s2, s3, s4, s5, s6],  # 各sourceの画像サイズ
         'steps': [12, 24, 48, 96, 160, 512],  # DBOXの大きさを決める
         'min_sizes': [52, 104, 208, 288, 382, 480],  # DBOXの大きさを決める
         'max_sizes': [104, 208, 288, 382, 480, 540],  # DBOXの大きさを決める
