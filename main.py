@@ -216,7 +216,7 @@ def main():
     # SSD300の設定
     
     ssd_cfg = {
-        'num_classes': 13,  # 背景クラスを含めた合計クラス数
+        'num_classes': 2,  # 背景クラスを含めた合計クラス数
         'input_size': input_size,  # 画像の入力サイズ
         'bbox_aspect_num': [4, 6, 6, 6, 4, 4],  # 出力するDBoxのアスペクト比の種類
         'feature_maps': [128, 32, 15, 8, 6, 4],  # 各sourceの画像サイズ
