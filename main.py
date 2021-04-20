@@ -166,7 +166,7 @@ def main():
 
     anno_dic = {}
     for json_path in anno_path:
-        json_open = open(json_path, 'r')
+        json_open = open(json_path, 'r', encoding='utf-8')
         json_load = json.load(json_open)
         img_name = json_load['imagePath']
         width = json_load['imageWidth']
