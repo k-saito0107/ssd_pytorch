@@ -352,9 +352,9 @@ class Detect(Function):
         """
 
         # 各サイズを取得
-        num_batch = loc_data.size(0)  # ミニバッチのサイズ
-        num_dbox = loc_data.size(1)  # DBoxの数 = 8732
-        num_classes = conf_data.size(2)  # クラス数 = 21
+        num_batch = loc_data.size(0)  
+        num_dbox = loc_data.size(1)  
+        num_classes = conf_data.size(2)  
 
         # confはソフトマックスを適用して正規化する
         conf_data = self.softmax(conf_data)
