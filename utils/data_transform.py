@@ -37,3 +37,37 @@ class DataTransform():
             前処理のモードを指定。
         """
         return self.data_transform[phase](img, boxes, labels)
+
+
+def od_collate_fn(batch):
+    """
+    Datasetから取り出すアノテーションデータのサイズが画像ごとに異なります。
+    画像内の物体数が2個であれば(2, 5)というサイズですが、3個であれば（3, 5）など変化します。
+    この変化に対応したDataLoaderを作成するために、
+    カスタイマイズした、collate_fnを作成します。
+    collate_fnは、PyTorchでリストからmini-batchを作成する関数です。
+    ミニバッチ分の画像が並んでいるリスト変数batchに、
+    ミニバッチ番号を指定する次元を先頭に1つ追加して、リストの形を変形します。
+    """
+
+    targets = []
+    imgs = []
+    batch = filter(None, batch)
+    
+    for sample in batch:
+        if not(sample[0] is None):
+            imgs.append(sample[0])  # sample[0] は画像imgです
+            targets.append(torch.FloatTensor(sample[1]))  # sample[1] はアノテーションgtです
+
+    # imgsはミニバッチサイズのリストになっています
+    # リストの要素はtorch.Size([3, 300, 300])です。
+    # このリストをtorch.Size([batch_num, 3, 300, 300])のテンソルに変換します
+    imgs = torch.stack(imgs, dim=0)
+
+    # targetsはアノテーションデータの正解であるgtのリストです。
+    # リストのサイズはミニバッチサイズです。
+    # リストtargetsの要素は [n, 5] となっています。
+    # nは画像ごとに異なり、画像内にある物体の数となります。
+    # 5は [xmin, ymin, xmax, ymax, class_index] です
+
+    return imgs, targets
