@@ -150,7 +150,7 @@ def train_model(net, dataloaders_dict, criterion, optimizer, num_epochs):
 
 def main():
     #root_path = '../data'
-    #root_path = '/kw_resources/distortion_detection/data'
+    root_path = '/kw_resources/distortion_detection/data'
     img_path = glob.glob(root_path+'/img/*.png')
     anno_path = glob.glob(root_path + '/anno/*.json')
     #get-train-img-path
