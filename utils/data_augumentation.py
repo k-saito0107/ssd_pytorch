@@ -114,7 +114,7 @@ class Lambda(object):
 
 class ToAbsoluteCoords(object):
     def __call__(self, image, boxes=None, labels=None):
-        height, width = image.shape
+        height, width,_ = image.shape
         boxes[:, 0] *= width
         boxes[:, 2] *= width
         boxes[:, 1] *= height
@@ -125,7 +125,7 @@ class ToAbsoluteCoords(object):
 
 class ToPercentCoords(object):
     def __call__(self, image, boxes=None, labels=None):
-        height, width = image.shape
+        height, width, _ = image.shape
         boxes[:, 0] = boxes[:, 0]/width
         boxes[:, 2] = boxes[:, 2]/width
         boxes[:, 1] = boxes[:, 1]/height

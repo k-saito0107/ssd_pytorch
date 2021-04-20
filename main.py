@@ -26,8 +26,8 @@ def train_model(net, dataloaders_dict, criterion, optimizer, num_epochs):
     # GPUが使えるかを確認
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
     print(device)
-    #model_path = "/kw_resources/moji_classification/weights/ssd_resnet_ver1.pth"
-    model_path = '../weights/ssd_resnet_'+str(num_epochs)+'.pth'
+    model_path = "/kw_resources/distortion_detection/weights/ssd_resnet.pth"
+    #model_path = '../weights/ssd_resnet_'+str(num_epochs)+'.pth'
     if os.path.exists(model_path):
         state_dict = torch.load(model_path)
         net.load_state_dict(state_dict)
@@ -129,8 +129,8 @@ def train_model(net, dataloaders_dict, criterion, optimizer, num_epochs):
         log_epoch = {'epoch': epoch, 'train_loss': epoch_train_loss, 'val_loss': epoch_val_loss}
         logs.append(log_epoch)
         df = pd.DataFrame(logs)
-        df.to_csv("log_output.csv")
-        #df.to_csv("/kw_resources/moji_classification/log_output.csv")
+        #df.to_csv("log_output.csv")
+        df.to_csv("/kw_resources/distortion_detection/log_output.csv")
 
         epoch_train_loss = 0.0  # epochの損失和
         epoch_val_loss = 0.0  # epochの損失和
@@ -149,8 +149,8 @@ def train_model(net, dataloaders_dict, criterion, optimizer, num_epochs):
 
 
 def main():
-    root_path = '../data'
-    
+    #root_path = '../data'
+    root_path = '/kw_resources/distortion_detection/data'
     img_path = glob.glob(root_path+'/img/*.png')
     anno_path = glob.glob(root_path + '/anno/*.json')
     #get-train-img-path
@@ -223,7 +223,7 @@ def main():
         'steps': [12, 24, 48, 96, 160, 512],  # DBOXの大きさを決める
         'min_sizes': [52, 104, 208, 288, 382, 480],  # DBOXの大きさを決める
         'max_sizes': [104, 208, 288, 382, 480, 540],  # DBOXの大きさを決める
-        'aspect_ratios': [[2], [2, 3], [2, 3], [2, 3], [2], [2]],
+        'aspect_rations': [[2], [2, 3], [2, 3], [2, 3], [2], [2]],
         'in_ch' : 3,
         'out_ch' : 64
     }
@@ -243,7 +243,7 @@ def main():
     #optimizer = optim.Adam(net.parameters(), lr = 0.00001)
 
     #trainning
-    num_epoch = 500
+    num_epoch = 200
     train_model(net, dataloaders_dict, criterion, optimizer, num_epochs=num_epoch)
 
 

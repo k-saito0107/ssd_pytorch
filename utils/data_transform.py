@@ -7,7 +7,7 @@ import torch.nn as nn
 import cv2
 
 
-from utils.data_augumentation import Enhance, ToAbsoluteCoords, RandomMirror, ToPercentCoords, Resize, Normalize_Tensor
+from utils.data_augumentation import Enhance, ToAbsoluteCoords, RandomMirror, ToPercentCoords, Resize, Normalize_Tensor, Compose
 
 class DataTransform():
     

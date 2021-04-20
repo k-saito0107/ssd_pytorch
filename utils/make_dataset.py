@@ -46,10 +46,9 @@ class MakeDataset(data.Dataset):
         
         image_file_path = self.img_list[index]
         img = cv2.imread(image_file_path)  # [高さ][幅][色BGR]
-        img = cv2.cvtColor(img, cv2.COLOR_RGB2GRAY)
+        #img = cv2.cvtColor(img, cv2.COLOR_RGB2GRAY)
         img_name = image_file_path.split('/')[-1]
-        height, width = img.shape  # 画像のサイズを取得
-
+        
         #anno_file_path = self.anno_list[index]
         
         anno_list = self.anno_list[img_name]

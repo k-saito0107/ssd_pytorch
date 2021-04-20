@@ -4,6 +4,11 @@ import torch
 from torchvision import transforms
 import torch.utils.data as data
 import torch.nn as nn
+import torch.nn.init as init
+import torch.nn.functional as F
+from torch.autograd import Function
+from itertools import product as product
+from math import sqrt as sqrt
 
 
 def conv3x3(in_channels, out_channels, kernel_size = 3, stride = 1, padding = 1):
@@ -68,8 +73,8 @@ class Feature_extractor(nn.Module):
 
         self.layer1 = ResidualLayer(2, in_channels=out_ch, out_channels=out_ch)
         self.layer2 = ResidualLayer(2, in_channels=out_ch, out_channels=out_ch*2)
-        self.layer3 = ResidualLayer(2, in_channels=out_ch*2, out_channels=out_ch*4)
-        self.layer4 = ResidualLayer(2, in_channels=out_ch*4, out_channels=out_ch*8)
+        self.layer3 = ResidualLayer(3, in_channels=out_ch*2, out_channels=out_ch*4)
+        self.layer4 = ResidualLayer(3, in_channels=out_ch*4, out_channels=out_ch*8)
 
     def forward(self, x):
         out = self.conv1(x)
@@ -147,7 +152,7 @@ class DBox():
         self.max_size = cfg['max_sizes']
         self.aspect_rations = cfg['aspect_rations']
 
-    def make_box_list(self):
+    def make_dbox_list(self):
         mean = []
 
         for k, f in enumerate(self.feature_maps):
